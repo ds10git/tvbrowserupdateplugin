@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="padding_default" type="dimen">15dp</item>
+    <item name="font_size_default" type="dimen">18sp</item>
+</resources>
