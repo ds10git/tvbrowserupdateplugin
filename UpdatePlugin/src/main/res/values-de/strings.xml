@@ -15,6 +15,12 @@
     <string name="dialog_permission_message">Um ein Update von TV-Browser free manuell installieren zu können benötigt TV-Browser UpdatePlugin die notwendigen Rechte.\n\nMöchten Sie die Einstellungen mit der Rechtevergabe jetzt öffnen?</string>
     <string name="dialog_permission_ok">Einstellungen öffnen</string>
 
+    <string name="dialog_no_internet_title">Keine Internet-Verbindung</string>
+    <string name="dialog_no_internet_message">Bitte aktivieren Sie eine Internet-Verbindung und versuchen es erneut.</string>
+
+    <string name="dialog_no_update_title">Kein Update verfügbar</string>
+    <string name="dialog_no_update_message">Es wurde keine aktuellere Version von TV-Browser free gefunden.</string>
+
     <string name="notification_search">Suche nach Updates für TV-Browser free</string>
     <string name="notification_found_title">Update für TV-Browser free gefunden</string>
     <string name="notification_found_message">Klicken zum Herunterladen und zum Installieren</string>

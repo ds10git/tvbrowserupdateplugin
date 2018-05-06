@@ -1,5 +1,6 @@
 package org.tvbrowser.tvbrowserupdateplugin;
 
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -144,6 +145,12 @@ public class Info extends AppCompatActivity {
 
   @Override
   public void finish() {
+    NotificationManager manager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+    if(manager != null) {
+      manager.cancel(ServiceCheckAndDownload.ID_NOTIFICATION_INFO_UPDATE);
+    }
+
     PrefUtils.setVersionUpdateCurrent(Info.this, PrefUtils.VALUE_PREF_DEFAULT);
     PrefUtils.setVersionUpdateUrl(Info.this, "");
 

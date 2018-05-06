@@ -16,6 +16,12 @@
     <string name="dialog_permission_message">To install plugins manually, you need to grant TV-Browser the permission to install from unknown sources.\n\nDo you want to open the settings to grant the permission now?</string>
     <string name="dialog_permission_ok">Open settings</string>
 
+    <string name="dialog_no_internet_title">No network connection</string>
+    <string name="dialog_no_internet_message">Please activate a network connection and try again.</string>
+
+    <string name="dialog_no_update_title">No update available</string>
+    <string name="dialog_no_update_message">No update to a newer version of TV-Browser was found.</string>
+
     <string name="notification_search">Searching update for TV-Browser free</string>
     <string name="notification_found_title">Found update for TV-Browser free</string>
     <string name="notification_found_message">Click to download and install</string>

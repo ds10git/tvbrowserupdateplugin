@@ -1,7 +1,9 @@
 package org.tvbrowser.tvbrowserupdateplugin;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -91,6 +93,15 @@ public class Settings extends AppCompatActivity {
       @Override
       public void onReceive(Context context, Intent intent) {
         updateVisibility();
+
+        if(!intent.hasExtra(PrefUtils.EXTRA_NAME_VERSION)) {
+          AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+          builder.setCancelable(false);
+          builder.setTitle(R.string.dialog_no_update_title);
+          builder.setMessage(R.string.dialog_no_update_message);
+          builder.setPositiveButton(android.R.string.ok, null);
+          builder.show();
+        }
       }
     };
   }
@@ -142,14 +153,23 @@ public class Settings extends AppCompatActivity {
   }
 
   public void searchNow(final View view) {
-    final Intent search = new Intent(getApplicationContext(), ServiceCheckAndDownload.class);
-    search.setAction(PrefUtils.ACTION_CHECK);
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      startForegroundService(search);
+    if(!NetUtils.isOnline(Settings.this)) {
+      AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+      builder.setCancelable(false);
+      builder.setTitle(R.string.dialog_no_internet_title);
+      builder.setMessage(R.string.dialog_no_internet_message);
+      builder.setPositiveButton(android.R.string.ok, null);
+      builder.show();
     }
     else {
-      startService(search);
+      final Intent search = new Intent(getApplicationContext(), ServiceCheckAndDownload.class);
+      search.setAction(PrefUtils.ACTION_CHECK);
+
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForegroundService(search);
+      } else {
+        startService(search);
+      }
     }
   }
 }

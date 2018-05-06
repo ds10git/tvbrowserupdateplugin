@@ -1,6 +1,8 @@
 package org.tvbrowser.tvbrowserupdateplugin;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.Log;
 
@@ -236,5 +238,18 @@ public final class NetUtils {
     }
 
     return parent;
+  }
+
+  public static boolean isOnline(final Context context) {
+    boolean result = false;
+
+    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+
+    if(netInfo != null && netInfo.isConnectedOrConnecting()) {
+      result = true;
+    }
+
+    return result;
   }
 }
