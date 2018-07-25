@@ -1,6 +1,5 @@
 package org.tvbrowser.tvbrowserupdateplugin;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -8,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -41,9 +39,9 @@ public class ServiceCheckAndDownload extends Service {
         notify.setContentText(getString(R.string.notification_search));
         manager.notify(ID_NOTIFICATION_CHECK_OR_DOWNLOAD, notify.build());
 
-        int currentVersion = intent.getIntExtra(PrefUtils.EXTRA_VERSION_CODE_CURRENT, -1);
-
-        if(currentVersion == -1) {
+        int currentVersion = intent.getIntExtra(PrefUtils.EXTRA_VERSION_CODE_CURRENT, 0);
+Log.d("info22",""+currentVersion);
+        if(currentVersion == 0) {
           try {
             PackageInfo pInfo = getPackageManager().getPackageInfo("org.tvbrowser.tvbrowser", 0);
             currentVersion = pInfo.versionCode;
@@ -56,7 +54,7 @@ public class ServiceCheckAndDownload extends Service {
 
         final Intent info = new Intent(PrefUtils.ACTION_INFO);
 
-        if(currentVersion != -1 && NetUtils.isOnline(ServiceCheckAndDownload.this)) {
+        if(NetUtils.isOnline(ServiceCheckAndDownload.this)) {
           File directory = NetUtils.getDownloadDirectory(ServiceCheckAndDownload.this);
           File target = new File(directory, PrefUtils.FILE_NAME_UPDATE);
 
