@@ -33,7 +33,7 @@ public final class NetUtils {
     try {
       connection = new URL(urlString).openConnection();
       setConnectionTimeout(connection,15000);
-Log.d("info22",""+connection);
+
       if(urlString.toLowerCase(Locale.US).endsWith(".gz")) {
         connection.setRequestProperty("Accept-Encoding", "gzip,deflate");
       }
@@ -78,7 +78,7 @@ Log.d("info22",""+connection);
   public static boolean saveUrl(final String filename, final String urlString, final int timeout) {
     final AtomicBoolean wasSaved = new AtomicBoolean(false);
     final AtomicInteger count = new AtomicInteger(0);
-Log.d("info22",""+filename + " " + urlString);
+
     new Thread("SAVE URL THREAD") {
       public void run() {
         FileOutputStream fout = null;
@@ -232,11 +232,11 @@ Log.d("info22",""+filename + " " + urlString);
 
   public static File getDownloadDirectory(Context context) {
     File parent = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-    Log.d("info22","external "+parent);
+
     if(parent == null || !parent.isDirectory()) {
       parent = context.getDir(Environment.DIRECTORY_DOWNLOADS, Context.MODE_PRIVATE);
     }
-Log.d("info22",""+parent.getAbsolutePath());
+
     return parent;
   }
 

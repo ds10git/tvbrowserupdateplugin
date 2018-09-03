@@ -14,6 +14,7 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.io.File;
@@ -28,7 +29,7 @@ public class Info extends AppCompatActivity {
   @Override
   protected void onResume() {
     super.onResume();
-
+    Log.d("info22","Info");
     if(getIntent() != null && PrefUtils.ACTION_INSTALL.equals(getIntent().getAction())) {
       final String versionName = getIntent().getStringExtra(PrefUtils.EXTRA_NAME_VERSION);
       final String url = getIntent().getStringExtra(PrefUtils.EXTRA_URL_DOWNLOAD);
