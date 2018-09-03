@@ -10,7 +10,7 @@
 
     <string name="dialog_info_update_download">Downloading update to {0} for TV-Browser free.</string>
     <string name="dialog_info_update_error">Error.</string>
-    <string name="dialog_info_update_error_message">Could not download update</string>
+    <string name="dialog_info_update_error_message">Could not download update.\n\nPlease try using browser to download and install:\n\n{0}</string>
 
     <string name="dialog_permission_title">Installation needs permission</string>
     <string name="dialog_permission_message">To install plugins manually, you need to grant TV-Browser the permission to install from unknown sources.\n\nDo you want to open the settings to grant the permission now?</string>

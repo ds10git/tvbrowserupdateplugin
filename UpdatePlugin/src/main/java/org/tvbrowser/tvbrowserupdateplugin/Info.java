@@ -10,6 +10,11 @@ import android.os.Build;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
+import android.widget.TextView;
 
 import java.io.File;
 
@@ -42,6 +47,7 @@ public class Info extends AppCompatActivity {
     AsyncTask<String, Void, Boolean> async = new AsyncTask<String, Void, Boolean>() {
       private ProgressDialog mProgress;
       private File mPluginFile;
+      private String mDownloadURL;
 
       protected void onPreExecute() {
         mProgress = new ProgressDialog(Info.this);
@@ -58,6 +64,8 @@ public class Info extends AppCompatActivity {
         if(mPluginFile.isFile()) {
           mPluginFile.delete();
         }
+
+        mDownloadURL = params[1];
 
         return NetUtils.saveUrl(params[0], params[1], 15000);
       }
@@ -102,9 +110,16 @@ public class Info extends AppCompatActivity {
           final android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(Info.this);
           builder.setCancelable(false);
           builder.setTitle(R.string.dialog_info_update_error);
-          builder.setMessage(R.string.dialog_info_update_error_message);
+
+          final SpannableString message = new SpannableString(getString(R.string.dialog_info_update_error_message).replace("{0}", mDownloadURL));
+          Linkify.addLinks(message, Linkify.WEB_URLS);
+          builder.setMessage(message);
+
           builder.setPositiveButton(android.R.string.ok, (dialog,which) -> finish());
-          builder.show();
+          android.app.AlertDialog d = builder.create();
+          d.show();
+
+          ((TextView)d.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
         }
       }
     };

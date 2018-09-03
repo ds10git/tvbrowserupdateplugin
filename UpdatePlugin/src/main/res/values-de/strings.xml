@@ -9,7 +9,7 @@
 
     <string name="dialog_info_update_download">Update auf {0} für TV-Browser free herunterladen.</string>
     <string name="dialog_info_update_error">Fehler.</string>
-    <string name="dialog_info_update_error_message">Update konnten nicht heruntergeladen werden.</string>
+    <string name="dialog_info_update_error_message">Update konnten nicht heruntergeladen werden.\n\nBitte versuchen Sie den Download und die Installation mit dem Browser:\n\n{0}</string>
 
     <string name="dialog_permission_title">Berechtigung für Installation benötigt</string>
     <string name="dialog_permission_message">Um ein Update von TV-Browser free manuell installieren zu können benötigt TV-Browser UpdatePlugin die notwendigen Rechte.\n\nMöchten Sie die Einstellungen mit der Rechtevergabe jetzt öffnen?</string>
