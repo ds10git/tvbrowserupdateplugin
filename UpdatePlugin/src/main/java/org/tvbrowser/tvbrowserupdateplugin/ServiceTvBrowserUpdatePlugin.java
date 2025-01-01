@@ -7,7 +7,9 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.support.annotation.Nullable;
+import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import org.tvbrowser.devplugin.Channel;
 import org.tvbrowser.devplugin.Plugin;
@@ -25,10 +27,9 @@ public class ServiceTvBrowserUpdatePlugin extends Service {
     return getBinder;
   }
 
-  private Plugin.Stub getBinder = new Plugin.Stub() {
-    private int mVersionCodeCurrent = -1;
+  private final Plugin.Stub getBinder = new Plugin.Stub() {
 
-    @Override
+      @Override
     public String getVersion() throws RemoteException {
       String version = "UNKONW";
 
@@ -36,7 +37,7 @@ public class ServiceTvBrowserUpdatePlugin extends Service {
         PackageInfo pInfo = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), 0);
         version = pInfo.versionName;
       } catch (PackageManager.NameNotFoundException e) {
-        e.printStackTrace();
+        Log.d("info","Error getting package info", e);
       }
 
       return version;
@@ -116,12 +117,12 @@ public class ServiceTvBrowserUpdatePlugin extends Service {
 
     @Override
     public void onActivation(PluginManager pluginManager) throws RemoteException {
-      mVersionCodeCurrent = pluginManager.getTvBrowserSettings().getTvbVersionCode();
+      int versionCodeCurrent = pluginManager.getTvBrowserSettings().getTvbVersionCode();
 
       if(PrefUtils.getUpdateSearchNext(ServiceTvBrowserUpdatePlugin.this) < System.currentTimeMillis()) {
         final Intent search = new Intent(getApplicationContext(), ServiceCheckAndDownload.class);
         search.setAction(PrefUtils.ACTION_CHECK);
-        search.putExtra(PrefUtils.EXTRA_VERSION_CODE_CURRENT, mVersionCodeCurrent);
+        search.putExtra(PrefUtils.EXTRA_VERSION_CODE_CURRENT, versionCodeCurrent);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
           startForegroundService(search);

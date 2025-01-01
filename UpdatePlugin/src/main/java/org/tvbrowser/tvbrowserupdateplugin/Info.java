@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
+import androidx.core.content.FileProvider;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -59,7 +59,6 @@ public class Info extends AppCompatActivity {
 
       @Override
       protected Boolean doInBackground(String... params) {
-        for(String para : params)
         mPluginFile = new File(params[0]);
 
         if(mPluginFile.isFile()) {
@@ -146,6 +145,8 @@ public class Info extends AppCompatActivity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
     if(requestCode == REQUEST_CODE_PERMISSION_GRANT) {
       if (mInstallRunnable != null && canRequestPackageInstalls(Info.this)) {
         mInstallRunnable.run();

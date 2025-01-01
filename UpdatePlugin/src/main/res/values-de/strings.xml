@@ -48,4 +48,12 @@
   JEDOCH NICHT DARAUF BESCHRÄNKT. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHTINHABER FÜR JEGLICHEN SCHADEN
   ODER SONSTIGE ANSPRÜCHE HAFTBAR ZU MACHEN, OB INFOLGE DER ERFÜLLUNG EINES VERTRAGES, EINES DELIKTES ODER
   ANDERS IM ZUSAMMENHANG MIT DER SOFTWARE ODER SONSTIGER VERWENDUNG DER SOFTWARE ENTSTANDEN.</p>]]></string>
+    <string name="dialog_no_revoke_title">Berechtigungen behalten</string>
+    <string name="dialog_no_revoke_message">Bitte erlauben Sie TV-Browser-Update-Plugin die gewährten Berechtigungen zu behalten.\n\nNur wenn das Update-Plugin die Berechtigungen hat, kann es Sie über Updates von TV-Browser informieren.</string>
+
+    <string name="dialog_no_revoke_info_title">Hinweis zu Berechtigungen behalten</string>
+    <string name="dialog_no_revoke_info_message">Je nach Hersteller, hat die Einstellung zur Entfernung der Berechtigungen unterschiedliche Namen oder fehlt vollständig.\nEs handelt sich um einen Schiebregler mit z.B. folgenden Namen:\n\n-Berechtigung für ungenutzte Apps enfernen\n-App-Aktivität bei Nichtnutzung stoppen\n-App bei Nichtnutzung pausieren\n\nDieser Schieberegler muss deaktiviert werden.</string>
+
+    <string name="dialog_notification_permission_title">Benachrichtigungen erlauben</string>
+    <string name="dialog_notification_permission_message">Bitte erlauben Sie TV-Browser-Update-Plugin Benachrichtigungen anzuzeigen.\n\nNur wenn Benachrichtigungen angezeigt werden können, kann TV-Browser-Update-Plugin Sie über neue Versionen informieren.</string>
 </resources>

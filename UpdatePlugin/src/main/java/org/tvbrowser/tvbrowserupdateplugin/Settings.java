@@ -1,28 +1,39 @@
 package org.tvbrowser.tvbrowserupdateplugin;
 
+import static androidx.core.content.UnusedAppRestrictionsConstants.*;
+
+import android.Manifest;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Spinner;
 
+import androidx.core.content.ContextCompat;
+import androidx.core.content.IntentCompat;
+import androidx.core.content.PackageManagerCompat;
+
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.Calendar;
+import java.util.concurrent.ExecutionException;
 
 public class Settings extends AppCompatActivity {
-  private BroadcastReceiver mUpdates;
   private static final int[] UPDATE_FREQUENCIES = {
       -1,
       7,
@@ -30,6 +41,20 @@ public class Settings extends AppCompatActivity {
       180
   };
 
+  private final ActivityResultLauncher<Intent> mStartActivityIntent = registerForActivityResult(
+          new ActivityResultContracts.StartActivityForResult(),
+          r -> {
+            Log.d("info22","result " + r);
+            PrefUtils.setNoRevokePermissionAsked(getApplicationContext(),true);
+          }
+  );
+  // Register the permissions callback, which handles the user's response to the
+// system permissions dialog. Save the return value, an instance of
+// ActivityResultLauncher, as an instance variable.
+  private final ActivityResultLauncher<String> requestPermissionLauncher =
+          registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            //handled by system
+          });
   private int mUpdateFequencyCurrent;
   private boolean mIncludeBetaVersions;
 
@@ -88,22 +113,20 @@ public class Settings extends AppCompatActivity {
 
       }
     });
+  }
+  @Subscribe
+  public void onMessageEvent(ServiceCheckAndDownload.MessageEvent event) {
+    Log.d("info22","onMessageEvent "+event);
+    updateVisibility();
 
-    mUpdates = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        updateVisibility();
-
-        if(!intent.hasExtra(PrefUtils.EXTRA_NAME_VERSION)) {
-          AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
-          builder.setCancelable(false);
-          builder.setTitle(R.string.dialog_no_update_title);
-          builder.setMessage(R.string.dialog_no_update_message);
-          builder.setPositiveButton(android.R.string.ok, null);
-          builder.show();
-        }
-      }
-    };
+    if(event.mVersionName == null) {
+      AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+      builder.setCancelable(false);
+      builder.setTitle(R.string.dialog_no_update_title);
+      builder.setMessage(R.string.dialog_no_update_message);
+      builder.setPositiveButton(android.R.string.ok, null);
+      builder.show();
+    }
   }
 
   @Override
@@ -115,7 +138,9 @@ public class Settings extends AppCompatActivity {
         PrefUtils.setVersionUpdateCurrent(Settings.this, PrefUtils.VALUE_PREF_DEFAULT);
         PrefUtils.setVersionUpdateUrl(Settings.this, "");
       }
-    } catch (PackageManager.NameNotFoundException e) {}
+    } catch (PackageManager.NameNotFoundException e) {
+      //ignore
+    }
 
     super.onResume();
 
@@ -123,12 +148,87 @@ public class Settings extends AppCompatActivity {
 
     final IntentFilter filter = new IntentFilter(PrefUtils.ACTION_INFO);
 
-    LocalBroadcastManager.getInstance(Settings.this).registerReceiver(mUpdates, filter);
+    EventBus.getDefault().register(this);
+    Log.d("info22","getNoRevokePermissionAsked " + PrefUtils.getNoRevokePermissionAsked(getApplicationContext()));
+    if(!PrefUtils.getNoRevokePermissionAsked(getApplicationContext())) {
+      ListenableFuture<Integer> future = PackageManagerCompat.getUnusedAppRestrictionsStatus(getApplicationContext());
+
+      future.addListener(() -> {
+        try {
+          onResult(future.get());
+        } catch (ExecutionException e) {
+          throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }, ContextCompat.getMainExecutor(getApplicationContext()));
+    }
+  }
+
+  void onResult(int appRestrictionsStatus) {
+    switch (appRestrictionsStatus) {
+      // Couldn't fetch status. Check logs for details.
+      case ERROR: {
+        break;
+      }
+      // Restrictions don't apply to your app on this device.
+      case FEATURE_NOT_AVAILABLE: {
+        break;
+      }
+      // The user has disabled restrictions for your app.
+      case DISABLED: {
+        break;
+      }
+      // If the user doesn't start your app for a few months, the system will
+      // place restrictions on it. See the API_* constants for details.
+      case API_30_BACKPORT:
+      case API_30:
+      case API_31: {
+        handleRestrictions(appRestrictionsStatus);
+        break;
+      }
+    }
+  }
+
+  void handleRestrictions(int appRestrictionsStatus) {
+    Log.d("info22",""+appRestrictionsStatus);
+    AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+    builder.setCancelable(false);
+    builder.setTitle(R.string.dialog_no_revoke_title);
+    builder.setMessage(R.string.dialog_no_revoke_message);
+    builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+      AlertDialog.Builder builder1 = new AlertDialog.Builder(Settings.this);
+      builder1.setCancelable(false);
+      builder1.setTitle(R.string.dialog_no_revoke_info_title);
+      builder1.setMessage(R.string.dialog_no_revoke_info_message);
+      builder1.setPositiveButton(android.R.string.ok, (dialog1, which1) -> {
+        // If your app works primarily in the background, you can ask the user
+        // to disable these restrictions. Check if you have already asked the
+        // user to disable these restrictions. If not, you can show a message to the
+        // user explaining why permission auto-reset or app hibernation should be
+        // disabled. Then, redirect the user to the page in system settings where they
+        // can disable the feature.
+        Log.d("info22","request permissions");
+
+        Intent intent = IntentCompat.createManageUnusedAppRestrictionsIntent(Settings.this, getPackageName());
+
+        // You must use startActivityForResult(), not startActivity(), even if
+        // you don't use the result code returned in onActivityResult().
+        mStartActivityIntent.launch(intent);
+      });
+
+      builder1.show();
+    });
+    builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+      Log.d("info22","cancel");
+      PrefUtils.setNoRevokePermissionAsked(Settings.this, true);
+    });
+    builder.show();
   }
 
   @Override
   protected void onPause() {
-    LocalBroadcastManager.getInstance(Settings.this).unregisterReceiver(mUpdates);
+    EventBus.getDefault().unregister(this);
     super.onPause();
   }
 
@@ -153,6 +253,18 @@ public class Settings extends AppCompatActivity {
   }
 
   public void searchNow(final View view) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && ContextCompat.checkSelfPermission(Settings.this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+      AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
+      builder.setCancelable(false);
+      builder.setTitle(R.string.dialog_notification_permission_title);
+      builder.setMessage(R.string.dialog_notification_permission_message);
+      builder.setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+      });
+      builder.setNegativeButton(android.R.string.cancel, null);
+      builder.show();
+    }
+
     if(!NetUtils.isOnline(Settings.this)) {
       AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
       builder.setCancelable(false);

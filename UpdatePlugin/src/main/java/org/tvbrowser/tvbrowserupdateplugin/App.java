@@ -4,7 +4,7 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 
 public class App extends Application {
   private static App INSTANCE;
@@ -47,10 +47,10 @@ public class App extends Application {
    */
   @RequiresApi(Build.VERSION_CODES.O)
   private void createNotificationChannel() {
-    final long[] vibrationPattern = new long[] {1000,200,1000,400,1000,600};
+    //final long[] vibrationPattern = new long[] {1000,200,1000,400,1000,600};
 
     final NotificationChannel notificationChannelDefault = new NotificationChannel(getNotificationChannelId(),getNotificationChannelName(), NotificationManager.IMPORTANCE_DEFAULT);
-    notificationChannelDefault.setVibrationPattern(null);
+    //notificationChannelDefault.setVibrationPattern(vibrationPattern);
     notificationChannelDefault.setSound(null,null);
 
     final NotificationManager service = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);

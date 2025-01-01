@@ -22,6 +22,15 @@
     <string name="dialog_no_update_title">No update available</string>
     <string name="dialog_no_update_message">No update to a newer version of TV-Browser was found.</string>
 
+    <string name="dialog_no_revoke_title">Keep permissions</string>
+    <string name="dialog_no_revoke_message">Please allow TV-Browser Update-Plugin to keep all granted permissions.\n\nThe Update-Plugin can only inform you about updates, if it has the needed permissions.</string>
+
+    <string name="dialog_no_revoke_info_title">Information to Keep permissions</string>
+    <string name="dialog_no_revoke_info_message">The setting can have different names, it regularly is a slider or is even missing completely.\nFor example the slider can have the following names:\n\n-Remove permissions if app is unused\m-Pause app activity if unused\n\nThis slider has to be disabled.</string>
+
+    <string name="dialog_notification_permission_title">Allow notifications</string>
+    <string name="dialog_notification_permission_message">Please allow TV-Browser Update-Plugin to show notifications.\nOnly when notifications are allowed, you can be informed about found updates.</string>
+
     <string name="notification_search">Searching update for TV-Browser free</string>
     <string name="notification_found_title">Found update for TV-Browser free</string>
     <string name="notification_found_message">Click to download and install</string>

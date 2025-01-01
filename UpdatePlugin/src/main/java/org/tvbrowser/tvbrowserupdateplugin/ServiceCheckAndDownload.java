@@ -6,11 +6,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,8 +33,13 @@ public class ServiceCheckAndDownload extends Service {
     NotificationCompat.Builder notify = new NotificationCompat.Builder(ServiceCheckAndDownload.this, App.getInstance().getNotificationChannelId());
     notify.setContentTitle(getString(R.string.app_name));
     notify.setSmallIcon(R.drawable.ic_notify);
-    startForeground(ID_NOTIFICATION_CHECK_OR_DOWNLOAD, notify.build());
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      startForeground(ID_NOTIFICATION_CHECK_OR_DOWNLOAD, notify.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
+    }
+    else {
+      startForeground(ID_NOTIFICATION_CHECK_OR_DOWNLOAD, notify.build());
+    }
 
     if(intent != null) {
       if (PrefUtils.ACTION_CHECK.equals(intent.getAction())) {
@@ -45,6 +53,7 @@ Log.d("info22",""+currentVersion);
           try {
             PackageInfo pInfo = getPackageManager().getPackageInfo("org.tvbrowser.tvbrowser", 0);
             currentVersion = pInfo.versionCode;
+            Log.d("info22","PackageInfo: "+currentVersion);
           } catch (PackageManager.NameNotFoundException e) {
             Log.d("info5","",e);
           }
@@ -52,24 +61,22 @@ Log.d("info22",""+currentVersion);
 
         currentVersion = Math.max(currentVersion,PrefUtils.getVersionUpdateCurrent(ServiceCheckAndDownload.this));
 
-        final Intent info = new Intent(PrefUtils.ACTION_INFO);
+        final MessageEvent info = new MessageEvent();
 
         if(NetUtils.isOnline(ServiceCheckAndDownload.this)) {
           File directory = NetUtils.getDownloadDirectory(ServiceCheckAndDownload.this);
           File target = new File(directory, PrefUtils.FILE_NAME_UPDATE);
 
           if (NetUtils.saveUrl(target.getAbsolutePath(), PrefUtils.URL_UPDATE_PATH + PrefUtils.FILE_NAME_UPDATE, 10000)) {
-            BufferedReader in = null;
-
-            try {
-              in = new BufferedReader(new InputStreamReader(NetUtils.decompressStream(new FileInputStream(target))));
-
+            Log.d("info22","SAVED");
+            try(BufferedReader in = new BufferedReader(new InputStreamReader(NetUtils.decompressStream(new FileInputStream(target))))) {
               String line = null;
               String[] parts = null;
 
               int index = 0;
 
               while ((line = in.readLine()) != null) {
+                Log.d("info22",line);
                 if (line.contains(";") && (index == 0 || PrefUtils.isIncludeBetaVersions(ServiceCheckAndDownload.this))) {
                   index++;
                   parts = line.split(";");
@@ -79,7 +86,6 @@ Log.d("info22",""+currentVersion);
                   }
                 }
               }
-
               PrefUtils.setUpdateSearchNext(ServiceCheckAndDownload.this, System.currentTimeMillis());
 
               if(parts != null) {
@@ -93,7 +99,7 @@ Log.d("info22",""+currentVersion);
                 PrefUtils.setVersionUpdateCurrent(ServiceCheckAndDownload.this, Integer.parseInt(parts[0]));
                 PrefUtils.setVersionUpdateUrl(ServiceCheckAndDownload.this, parts[3]);
 
-                PendingIntent pending = PendingIntent.getActivity(getApplicationContext(), 0, startDownload, 0);
+                PendingIntent pending = PendingIntent.getActivity(getApplicationContext(), 0, startDownload, PendingIntent.FLAG_IMMUTABLE);
 
                 NotificationCompat.Builder n2 = new NotificationCompat.Builder(ServiceCheckAndDownload.this, App.getInstance().getNotificationChannelId());
                 n2.setPriority(NotificationCompat.PRIORITY_DEFAULT);
@@ -105,26 +111,19 @@ Log.d("info22",""+currentVersion);
                 n2.setContentIntent(pending);
                 manager.notify(ID_NOTIFICATION_INFO_UPDATE, n2.build());
 
-                info.putExtra(PrefUtils.EXTRA_NAME_VERSION, parts[1]);
-                info.putExtra(PrefUtils.EXTRA_URL_DOWNLOAD, parts[3]);
+                info.mVersionName = parts[1];
+                info.mDownloadUrl = parts[3];
               }
             } catch (IOException ioe) {
-
-            } finally {
-              if (in != null) {
-                try {
-                  in.close();
-                } catch (IOException e) {
-                  e.printStackTrace();
-                }
-              }
+              Log.d("info22","Error downloading", ioe);
+              // ignore
             }
 
             target.delete();
           }
         }
 
-        LocalBroadcastManager.getInstance(ServiceCheckAndDownload.this).sendBroadcast(info);
+        EventBus.getDefault().post(info);
       }
 
       stopSelf();
@@ -142,4 +141,9 @@ Log.d("info22",""+currentVersion);
 
   @Override
   public IBinder onBind(Intent intent) { return null; }
+
+  public static class MessageEvent {
+    public String mVersionName;
+    public String mDownloadUrl;
+  }
 }

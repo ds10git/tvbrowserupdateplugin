@@ -1,11 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    namespace "org.tvbrowser.tvbrowserupdateplugin"
+    compileSdk 35
+
     defaultConfig {
         applicationId "org.tvbrowser.tvbrowserupdateplugin"
         minSdkVersion 14
-        targetSdkVersion 27
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 35
+    }
+    buildFeatures {
+        aidl true
     }
     buildTypes {
         debug {
@@ -22,11 +28,22 @@ android {
         }
     }
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        targetCompatibility 11
+        sourceCompatibility 11
+    }
+    sourceSets {
+        main {
+            aidl {
+                srcDirs 'src/main/aidl'
+            }
+        }
     }
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation("org.greenrobot:eventbus:3.3.1")
+    implementation "androidx.concurrent:concurrent-futures:1.2.0"
+    implementation("androidx.core:core:1.9.0")
+    implementation 'androidx.preference:preference:1.2.1'
 }

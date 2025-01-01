@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,7 +27,6 @@ import javax.net.ssl.HttpsURLConnection;
 
 public final class NetUtils {
   private static byte[] loadUrl(final String urlString, final AtomicInteger timeoutCount) throws MalformedURLException, IOException {
-    BufferedInputStream in = null;
     ByteArrayOutputStream out = new ByteArrayOutputStream();
 
     URLConnection connection = null;
@@ -38,28 +38,22 @@ public final class NetUtils {
         connection.setRequestProperty("Accept-Encoding", "gzip,deflate");
       }
 
-      in = new BufferedInputStream(connection.getInputStream());
+      try(BufferedInputStream in = new BufferedInputStream(connection.getInputStream());) {
+        byte[] temp = new byte[1024];
+        int count;
 
-      byte temp[] = new byte[1024];
-      int count;
+        while ((count = in.read(temp, 0, 1024)) != -1) {
+          if (count > 0) {
+            out.write(temp, 0, count);
 
-      while ((count = in.read(temp, 0, 1024)) != -1) {
-        if(temp != null && count > 0) {
-          out.write(temp, 0, count);
-
-          if(timeoutCount != null) {
-            timeoutCount.set(0);
+            if (timeoutCount != null) {
+              timeoutCount.set(0);
+            }
           }
         }
       }
     }
     finally {
-      if(in != null) {
-        try {
-          in.close();
-        }catch(IOException ioe) {}
-      }
-
       disconnect(connection);
     }
 
@@ -81,12 +75,9 @@ public final class NetUtils {
 
     new Thread("SAVE URL THREAD") {
       public void run() {
-        FileOutputStream fout = null;
-
-        try {
+        try(FileOutputStream fout = new FileOutputStream(filename);) {
           byte[] byteArr = loadUrl(urlString, count);
 
-          fout = new FileOutputStream(filename);
           fout.getChannel().truncate(0);
           fout.write(byteArr, 0, byteArr.length);
           fout.flush();
@@ -96,15 +87,6 @@ public final class NetUtils {
         catch(IOException e) {
           Log.d("info5","",e);
         }
-        finally {
-          if(fout != null) {
-            try {
-              fout.close();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          }
-        }
       }
     }.start();
 
@@ -113,7 +95,9 @@ public final class NetUtils {
         while(!wasSaved.get() && count.getAndIncrement() < (timeout / 100)) {
           try {
             sleep(100);
-          } catch (InterruptedException e) {}
+          } catch (InterruptedException e) {
+            //ignore
+          }
         }
       }
     };
@@ -167,14 +151,12 @@ public final class NetUtils {
 
           HttpURLConnection httpConnection = (HttpURLConnection)connection;
 
-          if(httpConnection != null) {
-            int responseCode = httpConnection.getResponseCode();
+          int responseCode = httpConnection.getResponseCode();
 
-            isConnected.set(responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_ACCEPTED
-                || responseCode == HttpURLConnection.HTTP_CREATED || responseCode == HttpsURLConnection.HTTP_SEE_OTHER);
-          }
+          isConnected.set(responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_ACCEPTED
+              || responseCode == HttpURLConnection.HTTP_CREATED || responseCode == HttpsURLConnection.HTTP_SEE_OTHER);
         } catch (IOException e) {
-          e.printStackTrace();
+          Log.d("info22","Error connecting to internet.",e);
         }
         finally  {
           disconnect(connection);
@@ -189,7 +171,9 @@ public final class NetUtils {
         while(!isConnected.get() && count++ <= (timeout / 100)) {
           try {
             sleep(100);
-          } catch (InterruptedException e) {}
+          } catch (InterruptedException e) {
+            //ignore
+          }
         }
       }
     };
@@ -197,7 +181,9 @@ public final class NetUtils {
 
     try {
       check.join();
-    } catch (InterruptedException e) {}
+    } catch (InterruptedException e) {
+      // ignore
+    }
 
     return isConnected.get();
   }
