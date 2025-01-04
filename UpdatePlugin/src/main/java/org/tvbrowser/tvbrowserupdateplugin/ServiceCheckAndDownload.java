@@ -13,6 +13,10 @@ import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.security.ProviderInstaller;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
@@ -67,10 +71,18 @@ Log.d("info22",""+currentVersion);
           File directory = NetUtils.getDownloadDirectory(ServiceCheckAndDownload.this);
           File target = new File(directory, PrefUtils.FILE_NAME_UPDATE);
 
-          if (NetUtils.saveUrl(target.getAbsolutePath(), PrefUtils.URL_UPDATE_PATH + PrefUtils.FILE_NAME_UPDATE, 10000)) {
+            try {
+                ProviderInstaller.installIfNeeded(getApplicationContext());
+            } catch (GooglePlayServicesRepairableException e) {
+                throw new RuntimeException(e);
+            } catch (GooglePlayServicesNotAvailableException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (NetUtils.saveUrl(target.getAbsolutePath(), PrefUtils.URL_UPDATE_PATH + PrefUtils.FILE_NAME_UPDATE, 10000)) {
             Log.d("info22","SAVED");
             try(BufferedReader in = new BufferedReader(new InputStreamReader(NetUtils.decompressStream(new FileInputStream(target))))) {
-              String line = null;
+              String line;
               String[] parts = null;
 
               int index = 0;

@@ -3,8 +3,11 @@ package org.tvbrowser.tvbrowserupdateplugin;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+
+import com.google.android.gms.security.ProviderInstaller;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +34,10 @@ public final class NetUtils {
 
     URLConnection connection = null;
     try {
+      if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+        SSLTool.disableCertificateValidation();
+      }
+
       connection = new URL(urlString).openConnection();
       setConnectionTimeout(connection,15000);
 
@@ -55,6 +62,10 @@ public final class NetUtils {
     }
     finally {
       disconnect(connection);
+
+      if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
+        SSLTool.resetCertificateValidation();
+      }
     }
 
     return out.toByteArray();
