@@ -16,10 +16,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.content.IntentCompat;
@@ -237,6 +240,39 @@ public class Settings extends AppCompatActivity {
 
     findViewById(R.id.settings_info_update_text).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     findViewById(R.id.settings_info_update_button).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    try {
+      PackageInfo pInfo = getPackageManager().getPackageInfo("com.google.android.gms", 0);
+
+      Log.d("info22","PackageInfo: "+pInfo.versionCode);
+
+      // Inflate the menu; this adds items to the action bar if it is present.
+      getMenuInflater().inflate(R.menu.main, menu);
+
+      return true;
+    } catch (PackageManager.NameNotFoundException e) {
+      Log.d("info5","",e);
+    }
+
+    return super.onCreateOptionsMenu(menu);
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if(item.getItemId() == R.id.open_play_protect) {
+      final Intent i = new Intent();
+      i.setClassName("com.google.android.gms", "com.google.android.gms.security.settings.VerifyAppsSettingsActivity" );
+      try {
+        startActivity(i);
+      } catch (android.content.ActivityNotFoundException ex) {
+        Toast.makeText(getApplicationContext(), getString(R.string.open_play_protect_error), Toast.LENGTH_LONG).show();
+      }
+    }
+
+    return super.onOptionsItemSelected(item);
   }
 
   public void updateFound(final View view) {
