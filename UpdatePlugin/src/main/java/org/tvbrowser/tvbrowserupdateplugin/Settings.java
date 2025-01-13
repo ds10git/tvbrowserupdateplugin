@@ -47,7 +47,6 @@ public class Settings extends AppCompatActivity {
   private final ActivityResultLauncher<Intent> mStartActivityIntent = registerForActivityResult(
           new ActivityResultContracts.StartActivityForResult(),
           r -> {
-            Log.d("info22","result " + r);
             PrefUtils.setNoRevokePermissionAsked(getApplicationContext(),true);
           }
   );
@@ -65,6 +64,14 @@ public class Settings extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_settings);
+
+    try{
+      String versionName = getPackageManager()
+              .getPackageInfo(getPackageName(), 0).versionName;
+      setTitle(getTitle()+" "+ versionName);
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
+    }
 
     mIncludeBetaVersions = PrefUtils.isIncludeBetaVersions(Settings.this);
     mUpdateFequencyCurrent = PrefUtils.getUpdateFrequency(Settings.this);
@@ -119,7 +126,6 @@ public class Settings extends AppCompatActivity {
   }
   @Subscribe
   public void onMessageEvent(ServiceCheckAndDownload.MessageEvent event) {
-    Log.d("info22","onMessageEvent "+event);
     updateVisibility();
 
     if(event.mVersionName == null) {
@@ -152,7 +158,7 @@ public class Settings extends AppCompatActivity {
     final IntentFilter filter = new IntentFilter(PrefUtils.ACTION_INFO);
 
     EventBus.getDefault().register(this);
-    Log.d("info22","getNoRevokePermissionAsked " + PrefUtils.getNoRevokePermissionAsked(getApplicationContext()));
+
     if(!PrefUtils.getNoRevokePermissionAsked(getApplicationContext())) {
       ListenableFuture<Integer> future = PackageManagerCompat.getUnusedAppRestrictionsStatus(getApplicationContext());
 
@@ -194,7 +200,6 @@ public class Settings extends AppCompatActivity {
   }
 
   void handleRestrictions(int appRestrictionsStatus) {
-    Log.d("info22",""+appRestrictionsStatus);
     AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
     builder.setCancelable(false);
     builder.setTitle(R.string.dialog_no_revoke_title);
@@ -211,7 +216,6 @@ public class Settings extends AppCompatActivity {
         // user explaining why permission auto-reset or app hibernation should be
         // disabled. Then, redirect the user to the page in system settings where they
         // can disable the feature.
-        Log.d("info22","request permissions");
 
         Intent intent = IntentCompat.createManageUnusedAppRestrictionsIntent(Settings.this, getPackageName());
 
@@ -223,7 +227,6 @@ public class Settings extends AppCompatActivity {
       builder1.show();
     });
     builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-      Log.d("info22","cancel");
       PrefUtils.setNoRevokePermissionAsked(Settings.this, true);
     });
     builder.show();
@@ -240,14 +243,13 @@ public class Settings extends AppCompatActivity {
 
     findViewById(R.id.settings_info_update_text).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     findViewById(R.id.settings_info_update_button).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    findViewById(R.id.settings_info_note_text).setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
   }
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     try {
       PackageInfo pInfo = getPackageManager().getPackageInfo("com.google.android.gms", 0);
-
-      Log.d("info22","PackageInfo: "+pInfo.versionCode);
 
       // Inflate the menu; this adds items to the action bar if it is present.
       getMenuInflater().inflate(R.menu.main, menu);
@@ -302,12 +304,7 @@ public class Settings extends AppCompatActivity {
     }
 
     if(!NetUtils.isOnline(Settings.this)) {
-      AlertDialog.Builder builder = new AlertDialog.Builder(Settings.this);
-      builder.setCancelable(false);
-      builder.setTitle(R.string.dialog_no_internet_title);
-      builder.setMessage(R.string.dialog_no_internet_message);
-      builder.setPositiveButton(android.R.string.ok, null);
-      builder.show();
+      NetUtils.showNoInternetConnectionDialog(Settings.this);
     }
     else {
       final Intent search = new Intent(getApplicationContext(), ServiceCheckAndDownload.class);

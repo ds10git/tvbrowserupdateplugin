@@ -1,5 +1,6 @@
 package org.tvbrowser.tvbrowserupdateplugin;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -248,5 +249,14 @@ public final class NetUtils {
     }
 
     return result;
+  }
+
+  public static void showNoInternetConnectionDialog(Context context) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    builder.setCancelable(false);
+    builder.setTitle(R.string.dialog_no_internet_title);
+    builder.setMessage(R.string.dialog_no_internet_message);
+    builder.setPositiveButton(android.R.string.ok, null);
+    builder.show();
   }
 }

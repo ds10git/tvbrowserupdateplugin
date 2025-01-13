@@ -17,6 +17,7 @@ public final class PrefUtils {
   public static final String EXTRA_URL_DOWNLOAD = "urlDownload";
   private static final String KEY_PREF_VERSION_UPDATE_CURRENT = "prefUpdateCurrent";
   private static final String KEY_PREF_NO_REVOKE_PERMISSION_ASKED = "prefNoRevokePermissionsAsked";
+  private static final String KEY_DOWNLOAD_FILE = "prefDownloadFile";
   private static final String KEY_PREF_VERSION_UPDATE_URL = "prefUpdateUrl";
   private static final String KEY_PREF_VERSION_UPDATE_NEXT = "prefUpdateNext";
 
@@ -91,5 +92,18 @@ public final class PrefUtils {
 
   public static void setIncludeBetaVersions(final Context context, final boolean value) {
     PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(KEY_PREF_UPDATE_INCLUDE_BETA, value).apply();
+  }
+
+  public static String getDownloadFile(final Context context) {
+    return PreferenceManager.getDefaultSharedPreferences(context).getString(KEY_DOWNLOAD_FILE, null);
+  }
+
+  public static void setDownloadFile(final Context context, final String downloadFile) {
+    if(downloadFile == null) {
+      PreferenceManager.getDefaultSharedPreferences(context).edit().remove(KEY_DOWNLOAD_FILE).apply();
+    }
+    else {
+      PreferenceManager.getDefaultSharedPreferences(context).edit().putString(KEY_DOWNLOAD_FILE, downloadFile).apply();
+    }
   }
 }

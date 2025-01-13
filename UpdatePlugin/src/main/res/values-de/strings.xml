@@ -9,7 +9,10 @@
 
     <string name="dialog_info_update_download">Update auf {0} für TV-Browser free herunterladen.</string>
     <string name="dialog_info_update_error">Fehler.</string>
-    <string name="dialog_info_update_error_message">Update konnten nicht heruntergeladen werden.\n\nBitte versuchen Sie den Download und die Installation mit dem Browser:\n\n{0}</string>
+    <string name="dialog_info_update_error_message">Update konnten nicht heruntergeladen werden.\n\nBitte versuchen Sie den Download und die Installation mit dem Browser.\n\nMöchten Sie den Browser jetzt öffnen und den Download von TV-Browser starten?</string>
+    <string name="dialog_info_update_error_ok">Browser öffnen</string>
+
+    <string name="info_play_protect">Hinweis: Sollte die Installation scheitern, weil Play Protect diese blockiert hat, kann Play Protect temporär über den Menueintrag \'Play Protect öffnen\' deaktiviert werden.</string>
 
     <string name="dialog_permission_title">Berechtigung für Installation benötigt</string>
     <string name="dialog_permission_message">Um ein Update von TV-Browser free manuell installieren zu können benötigt TV-Browser UpdatePlugin die notwendigen Rechte.\n\nMöchten Sie die Einstellungen mit der Rechtevergabe jetzt öffnen?</string>
@@ -58,4 +61,5 @@
 
     <string name="dialog_notification_permission_title">Benachrichtigungen erlauben</string>
     <string name="dialog_notification_permission_message">Bitte erlauben Sie TV-Browser-Update-Plugin Benachrichtigungen anzuzeigen.\n\nNur wenn Benachrichtigungen angezeigt werden können, kann TV-Browser-Update-Plugin Sie über neue Versionen informieren.</string>
+
 </resources>
